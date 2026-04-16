@@ -132,6 +132,15 @@
         .warning-card { background: #FFF3E0; border-left: 4px solid #FF9800; }
         .warning-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #ddd; }
         .warning-item:last-child { border-bottom: none; }
+        /* 采购修改相关样式 */
+        .edit-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .edit-list-info { flex: 1; }
+        .edit-list-btn { background: #2196F3; color: white; padding: 6px 12px; border-radius: 20px; font-size: 14px; width: auto; box-shadow: none; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-header .modal-title { margin-bottom: 0; }
+        .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px 8px; width: auto; box-shadow: none; color: #666; }
+        .log-entry { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .log-entry:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -143,11 +152,11 @@
 
 <!-- ==================== 模态框区域 ==================== -->
 <!-- 口味编辑模态框 -->
-<div class="modal-overlay" id="flavorModalOverlay" onclick="closeFlavorModal()"><div class="modal-card" onclick="event.stopPropagation()"><div class="modal-title" id="flavorModalTitle">编辑口味</div><input type="text" id="flavorNameInput" class="modal-input" placeholder="口味名称" autocomplete="off"><div style="margin-bottom:15px;"><div class="flavor-modal-row"><label>饼底 (g)</label><input type="number" id="modalBase" step="0.1" min="0" class="modal-input" style="margin:0;"><span class="cost-display" id="costBase">¥0.00</span></div><div id="dynamicIngredientsContainer"></div><button onclick="addDynamicIngredientRow()" class="secondary" style="margin-bottom:10px;">➕ 添加原料</button><div class="flavor-modal-row"><label>包装 (元)</label><input type="number" id="modalPack" step="0.01" min="0" class="modal-input" style="margin:0;"><span class="cost-display" id="costPack">¥0.00</span></div><div class="flavor-modal-row"><label>人工 (元)</label><input type="number" id="modalLabor" step="0.01" min="0" class="modal-input" style="margin:0;"><span class="cost-display" id="costLabor">¥0.00</span></div></div><div class="total-cost-row"><span>总成本</span><span id="modalTotalCost">¥0.00</span></div><div class="modal-actions"><button class="secondary" onclick="closeFlavorModal()">取消</button><button onclick="saveFlavorFromModal()">保存</button></div></div></div>
+<div class="modal-overlay" id="flavorModalOverlay" onclick="closeFlavorModal()"><div class="modal-card" onclick="event.stopPropagation()"><div class="modal-title" id="flavorModalTitle">编辑口味</div><input type="text" id="flavorNameInput" class="modal-input" placeholder="口味名称" autocomplete="off"><div style="margin-bottom:15px;"><div class="flavor-modal-row"><label>饼底 (g)</label><input type="number" id="modalBase" step="0.1" min="0" class="modal-input" style="margin:0;"><span class="cost-display" id="costBase">¥0.00</span></div><div id="dynamicIngredientsContainer"></div><button onclick="addDynamicIngredientRow()" class="secondary" style="margin-bottom:10px;">➕ 添加原料</button><div class="flavor-modal-row"><label>包装</label><span style="flex:1; text-align:right; padding-right:12px;" id="modalPackDisplay">—</span><span class="cost-display" id="costPack">¥0.00</span></div><div class="flavor-modal-row"><label>人工 (元)</label><input type="number" id="modalLabor" step="0.01" min="0" class="modal-input" style="margin:0;"><span class="cost-display" id="costLabor">¥0.00</span></div></div><div class="total-cost-row"><span>总成本</span><span id="modalTotalCost">¥0.00</span></div><div class="modal-actions"><button class="secondary" onclick="closeFlavorModal()">取消</button><button onclick="saveFlavorFromModal()">保存</button></div></div></div>
 <!-- 客户编辑 -->
 <div class="modal-overlay" id="customerModalOverlay" onclick="closeCustomerModal()"><div class="modal-card" onclick="event.stopPropagation()"><div class="modal-title" id="customerModalTitle">新增客户</div><input type="text" id="customerNameInput" class="modal-input" placeholder="客户名称" autocomplete="off"><div style="margin-bottom:12px;"><label>售价（元）</label><input type="number" id="customerPriceInput" step="0.5" min="0" class="modal-input" style="margin-top:4px;"></div><div class="modal-actions"><button class="secondary" onclick="closeCustomerModal()">取消</button><button onclick="saveCustomerFromModal()">保存</button></div></div></div>
-<!-- 采购添加 -->
-<div class="modal-overlay" id="purchaseModalOverlay" onclick="closePurchaseModal()"><div class="modal-card" onclick="event.stopPropagation()"><div class="modal-title">新增采购</div><div class="purchase-form-row"><label>原料</label><select id="purchaseIngredientSelect"></select></div><div class="purchase-form-row"><label id="purchaseUnitLabel">数量(kg)</label><input type="number" id="purchaseQuantity" min="0.001" step="0.001"></div><div class="purchase-form-row"><label>总价(元)</label><input type="number" id="purchasePrice" min="0" step="0.01"></div><div class="modal-actions"><button class="secondary" onclick="closePurchaseModal()">取消</button><button onclick="savePurchase()">保存</button></div></div></div>
+<!-- 采购添加/编辑模态框 -->
+<div class="modal-overlay" id="purchaseModalOverlay" onclick="closePurchaseModal()"><div class="modal-card" onclick="event.stopPropagation()"><div class="modal-title" id="purchaseModalTitle">新增采购</div><div class="purchase-form-row"><label>原料</label><select id="purchaseIngredientSelect"></select></div><div class="purchase-form-row"><label id="purchaseUnitLabel">数量(kg)</label><input type="number" id="purchaseQuantity" min="0.001" step="0.001"></div><div class="purchase-form-row"><label>总价(元)</label><input type="number" id="purchasePrice" min="0" step="0.01"></div><input type="hidden" id="editingPurchaseId" value=""><div class="modal-actions"><button class="secondary" onclick="closePurchaseModal()">取消</button><button id="purchaseSaveBtn" onclick="savePurchase()">保存</button></div></div></div>
 <!-- 原料管理 -->
 <div class="modal-overlay" id="ingredientModalOverlay" onclick="closeIngredientModal()"><div class="modal-card" onclick="event.stopPropagation()"><div class="modal-title">管理原料</div><div style="display:flex; gap:8px; margin-bottom:16px;"><input type="text" id="newIngredientName" placeholder="输入原料名称" style="flex:2;"><button onclick="addIngredient()" style="width:auto; padding:8px 16px; flex:1;">添加</button></div><div id="ingredientListContainer" style="max-height:300px; overflow-y:auto;"></div><div class="modal-actions" style="margin-top:16px;"><button class="secondary" onclick="closeIngredientModal()">关闭</button></div></div></div>
 <!-- 库存调整 -->
@@ -156,6 +165,22 @@
 <div class="modal-overlay" id="confirmProductionModal" onclick="closeConfirmProductionModal()"><div class="modal-card" onclick="event.stopPropagation()"><div class="modal-title">确认制作</div><div id="confirmProductionContent" style="margin-bottom:16px;"></div><div class="modal-actions"><button class="secondary" onclick="closeConfirmProductionModal()">取消</button><button onclick="executeProduction()">确认制作</button></div></div></div>
 <!-- 材料不足提示模态框 -->
 <div class="modal-overlay" id="insufficientModal" onclick="closeInsufficientModal()"><div class="modal-card" onclick="event.stopPropagation()"><div class="modal-title">⚠️ 材料不足</div><div id="insufficientContent" style="margin-bottom:16px; max-height:300px; overflow-y:auto;"></div><div class="modal-actions"><button onclick="closeInsufficientModal()">知道了</button></div></div></div>
+<!-- 采购修改列表模态框 -->
+<div class="modal-overlay" id="editPurchaseListModal" onclick="closeEditPurchaseListModal()"><div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+        <div class="modal-title">✏️ 修改近期采购</div>
+        <button class="icon-btn" onclick="showEditLogs()" title="查看修改记录">📋</button>
+    </div>
+    <div style="margin-bottom:12px; color:#666; font-size:14px;">仅显示昨日及今日的采购记录</div>
+    <div id="editPurchaseListContent" style="max-height:400px; overflow-y:auto;"></div>
+    <div class="modal-actions"><button class="secondary" onclick="closeEditPurchaseListModal()">关闭</button></div>
+</div></div>
+<!-- 采购修改记录模态框 (新增) -->
+<div class="modal-overlay" id="editLogsModal" onclick="closeEditLogsModal()"><div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-title">📋 采购修改记录</div>
+    <div id="editLogsContent" style="max-height:400px; overflow-y:auto;"></div>
+    <div class="modal-actions"><button class="secondary" onclick="closeEditLogsModal()">关闭</button></div>
+</div></div>
 
 <!-- ==================== 主视图容器 ==================== -->
 <div id="view-home" class="container"></div>
@@ -179,14 +204,15 @@
 (function(){
     "use strict";
     // ---------- 数据模型 ----------
-    const STORAGE_KEY = 'pizza_app_v34_fixed';
+    const STORAGE_KEY = 'pizza_app_v39_pack_edit_log';
     const PRESET_INGREDIENTS = ['面粉','番茄酱','菜丁','菠萝丁','榴莲','鸡丁','香肠','芝士','包装'];
     const defaultData = {
         flavors: [],
         customers: [ { name: '古早味', price: 10 }, { name: '个人版', price: 15 } ],
         sales: [], purchases: [], ingredients: PRESET_INGREDIENTS.slice(), productions: [],
         ingredientStock: {}, pizzaStock: {}, stockLogs: [],
-        ingredientUnitCost: {}   // 移动平均单价（元/克或元/个）
+        ingredientUnitCost: {},
+        purchaseEditLogs: []  // 新增采购修改日志
     };
     let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
     PRESET_INGREDIENTS.forEach(ing => { if (!appData.ingredients.includes(ing)) appData.ingredients.push(ing); });
@@ -195,11 +221,12 @@
     if (!appData.stockLogs) appData.stockLogs = [];
     if (!appData.productions) appData.productions = [];
     if (!appData.ingredientUnitCost) appData.ingredientUnitCost = {};
+    if (!appData.purchaseEditLogs) appData.purchaseEditLogs = [];
     appData.ingredients.forEach(ing => { 
         if (appData.ingredientStock[ing] === undefined) appData.ingredientStock[ing] = 0;
         if (appData.ingredientUnitCost[ing] === undefined) appData.ingredientUnitCost[ing] = 0;
     });
-    // 初始化移动平均单价：根据采购记录计算
+    // 初始化移动平均单价
     appData.ingredients.forEach(ing => {
         const purchases = appData.purchases.filter(p => p.ingredient === ing);
         if (purchases.length > 0) {
@@ -234,12 +261,10 @@
     function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
     function showToast(msg, d=1500) { const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', d); }
     
-    // 获取移动平均单价
     function getIngredientPricePerGram(ingredientName) {
         return Number(appData.ingredientUnitCost[ingredientName]) || 0;
     }
     
-    // 更新移动平均单价（采购入库时调用，先更新单价再调库存）
     function updateMovingAverageCost(ingredientName, addedQuantity, addedCost) {
         const currentStock = appData.ingredientStock[ingredientName] || 0;
         const currentUnitCost = appData.ingredientUnitCost[ingredientName] || 0;
@@ -251,7 +276,16 @@
         } else {
             appData.ingredientUnitCost[ingredientName] = 0;
         }
-        // 注意：不在这里调用 adjustIngredientStock，由采购流程统一处理
+    }
+    
+    function recalcIngredientUnitCost(ingredientName) {
+        const purchases = appData.purchases.filter(p => p.ingredient === ingredientName);
+        let totalCost = 0, totalUnits = 0;
+        purchases.forEach(p => {
+            totalCost += Number(p.total) || 0;
+            totalUnits += (ingredientName === '包装') ? (Number(p.quantity) || 0) : (Number(p.quantity) || 0) * 1000;
+        });
+        appData.ingredientUnitCost[ingredientName] = totalUnits > 0 ? totalCost / totalUnits : 0;
     }
     
     function calcDoughCost(doughWeight) {
@@ -263,7 +297,8 @@
     function calcFlavorCost(flavor) {
         let total = calcDoughCost(flavor.base || 0);
         (flavor.ingredients || []).forEach(ing => total += (ing.weight || 0) * getIngredientPricePerGram(ing.name));
-        total += (flavor.pack || 0) + (flavor.labor || 0);
+        total += getIngredientPricePerGram('包装');
+        total += (flavor.labor || 0);
         return total;
     }
     function addStockLog(itemType, itemName, change, newStock, reason, remark='') { appData.stockLogs.push({ date: new Date().toISOString().split('T')[0], itemType, itemName, change, newStock, reason, remark }); saveData(); }
@@ -280,6 +315,7 @@
         const doughWeight = (flavor.base || 0) * quantity;
         if (doughWeight > 0) { result['面粉'] = (result['面粉'] || 0) + (doughWeight / 111) * 66.7; }
         (flavor.ingredients || []).forEach(ing => { if (ing.weight > 0) result[ing.name] = (result[ing.name] || 0) + ing.weight * quantity; });
+        result['包装'] = (result['包装'] || 0) + quantity;
         return result;
     }
     function getLowStockIngredients() {
@@ -307,7 +343,7 @@
     }
     document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>showView(t.dataset.tab)));
 
-    // 首页
+    // 首页 (保持不变)
     function renderHome() {
         const today=new Date().toISOString().split('T')[0], tm=today.slice(0,7);
         const ts=appData.sales.filter(s=>s.date===today), ms=appData.sales.filter(s=>s.date.startsWith(tm));
@@ -337,7 +373,7 @@
         <div class="card warning-card"><div style="font-weight:bold; margin-bottom:8px;">⚠️ 库存预警</div>${warningHtml}</div>`;
     }
 
-    // 计价
+    // 计价 (保持不变)
     function renderBasic() {
         let html = `<div style="padding:16px;height:100%;display:flex;flex-direction:column;overflow-y:auto;"><div class="basic-nav"><button class="back-btn" onclick="showView('home')">← 返回</button><h3>计价</h3></div><div class="basic-tabs"><div class="basic-tab ${basicMode==='cost'?'active':''}" onclick="switchBasicMode('cost')">📊 原料成本</div><div class="basic-tab ${basicMode==='price'?'active':''}" onclick="switchBasicMode('price')">💰 客户定价</div></div>`;
         if (basicMode === 'cost') {
@@ -352,7 +388,7 @@
     }
     window.switchBasicMode = m => { basicMode = m; renderBasic(); };
 
-    // 动态原料行
+    // 动态原料行 (保持不变)
     function renderSingleDynamicRow(idx, ing) {
         const container = document.getElementById('dynamicIngredientsContainer');
         const row = document.createElement('div');
@@ -414,16 +450,18 @@
     };
     function updateModalCosts() {
         const base = parseFloat(document.getElementById('modalBase').value) || 0;
-        const pack = parseFloat(document.getElementById('modalPack').value) || 0;
         const labor = parseFloat(document.getElementById('modalLabor').value) || 0;
         let total = calcDoughCost(base);
         dynamicIngredients.forEach((ing, idx) => {
             const weight = parseFloat(document.getElementById(`dynWeight_${idx}`)?.value) || 0;
             if (ing.name) total += weight * getIngredientPricePerGram(ing.name);
         });
-        total += pack + labor;
+        const packCost = getIngredientPricePerGram('包装');
+        total += packCost;
+        total += labor;
         document.getElementById('costBase').textContent = `¥${calcDoughCost(base).toFixed(2)}`;
-        document.getElementById('costPack').textContent = `¥${pack.toFixed(2)}`;
+        document.getElementById('costPack').textContent = `¥${packCost.toFixed(2)}`;
+        document.getElementById('modalPackDisplay').textContent = `1 个 (单价 ¥${packCost.toFixed(2)})`;
         document.getElementById('costLabor').textContent = `¥${labor.toFixed(2)}`;
         document.getElementById('modalTotalCost').textContent = `¥${total.toFixed(2)}`;
     }
@@ -432,14 +470,13 @@
         document.getElementById('flavorModalTitle').textContent = '编辑口味';
         document.getElementById('flavorNameInput').value = f.name || '';
         document.getElementById('modalBase').value = f.base || '';
-        document.getElementById('modalPack').value = f.pack || '';
         document.getElementById('modalLabor').value = f.labor || '';
         dynamicIngredients = (f.ingredients || []).map(ing => ({...ing}));
         const container = document.getElementById('dynamicIngredientsContainer');
         container.innerHTML = '';
         dynamicIngredients.forEach((ing, idx) => renderSingleDynamicRow(idx, ing));
         updateModalCosts();
-        ['modalBase','modalPack','modalLabor'].forEach(id => document.getElementById(id).oninput = updateModalCosts);
+        ['modalBase','modalLabor'].forEach(id => document.getElementById(id).oninput = updateModalCosts);
         document.getElementById('flavorModalOverlay').style.display = 'flex';
     };
     window.openAddFlavorModal = function() {
@@ -447,19 +484,17 @@
         document.getElementById('flavorModalTitle').textContent = '新增口味';
         document.getElementById('flavorNameInput').value = '';
         document.getElementById('modalBase').value = '';
-        document.getElementById('modalPack').value = '';
         document.getElementById('modalLabor').value = '';
         dynamicIngredients = [];
         document.getElementById('dynamicIngredientsContainer').innerHTML = '';
         updateModalCosts();
-        ['modalBase','modalPack','modalLabor'].forEach(id => document.getElementById(id).oninput = updateModalCosts);
+        ['modalBase','modalLabor'].forEach(id => document.getElementById(id).oninput = updateModalCosts);
         document.getElementById('flavorModalOverlay').style.display = 'flex';
     };
     window.closeFlavorModal = () => document.getElementById('flavorModalOverlay').style.display = 'none';
     window.saveFlavorFromModal = function() {
         const name = document.getElementById('flavorNameInput').value.trim(); if(!name){ showToast('请输入口味名称'); return; }
         const base = parseFloat(document.getElementById('modalBase').value) || 0;
-        const pack = parseFloat(document.getElementById('modalPack').value) || 0;
         const labor = parseFloat(document.getElementById('modalLabor').value) || 0;
         const ingredients = [];
         dynamicIngredients.forEach((_, idx) => {
@@ -467,13 +502,13 @@
             const weight = parseFloat(document.getElementById(`dynWeight_${idx}`)?.value) || 0;
             if (ing && weight > 0) ingredients.push({ name: ing, weight });
         });
-        const newFlavor = { name, base, ingredients, pack, labor };
+        const newFlavor = { name, base, ingredients, labor };
         if(editingFlavorIndex===-1){ if(appData.flavors.some(f=>f.name===name)){ showToast('口味已存在'); return; } appData.flavors.push(newFlavor); appData.pizzaStock[name]=0; showToast(`已新增口味：${name}`); }
         else { const old=appData.flavors[editingFlavorIndex].name; if(old!==name && appData.flavors.some(f=>f.name===name)){ showToast('口味名称已存在'); return; } appData.flavors[editingFlavorIndex]=newFlavor; if(old!==name){ appData.pizzaStock[name]=appData.pizzaStock[old]||0; delete appData.pizzaStock[old]; } showToast(`已更新口味：${name}`); }
         saveData(); closeFlavorModal(); renderBasic(); if(!selectedFlavor || !appData.flavors.some(f=>f.name===selectedFlavor)) selectedFlavor = appData.flavors[0]?.name || '';
     };
 
-    // 客户编辑
+    // 客户编辑 (保持不变)
     window.editCustomer = function(i) { editingCustomerIndex=i; const c=appData.customers[i]; document.getElementById('customerModalTitle').textContent='编辑客户'; document.getElementById('customerNameInput').value=c.name; document.getElementById('customerNameInput').disabled=(i<2); document.getElementById('customerPriceInput').value=c.price||''; document.getElementById('customerModalOverlay').style.display='flex'; };
     window.openAddCustomerModal = function() { editingCustomerIndex=-1; document.getElementById('customerModalTitle').textContent='新增客户'; document.getElementById('customerNameInput').value=''; document.getElementById('customerNameInput').disabled=false; document.getElementById('customerPriceInput').value=''; document.getElementById('customerModalOverlay').style.display='flex'; };
     window.closeCustomerModal = () => document.getElementById('customerModalOverlay').style.display = 'none';
@@ -485,7 +520,7 @@
         saveData(); closeCustomerModal(); renderBasic(); if(!selectedCustomer || !appData.customers.some(c=>c.name===selectedCustomer)) selectedCustomer = appData.customers[0]?.name || '';
     };
 
-    // 开单
+    // 开单 (保持不变)
     function renderSale(){
         if(!appData.flavors.length){ views.sale.innerHTML='<p style="padding:40px;text-align:center;">请先在计价页新增口味</p>'; return; }
         if(!appData.customers.length){ views.sale.innerHTML='<p style="padding:40px;text-align:center;">请先在计价页新增客户</p>'; return; }
@@ -525,7 +560,7 @@
         saleQty = null; discountAmount = 0; renderSale(); showToast('已开单');
     };
 
-    // 销售记录
+    // 销售记录 (保持不变)
     function getFilteredSales(){ return appData.sales.filter(s=>{ if(filterCustomer&&s.customer!==filterCustomer) return false; if(filterFlavor&&s.flavor!==filterFlavor) return false; if(filterYear&&filterMonth){ const t=`${filterYear}-${filterMonth.padStart(2,'0')}`; if(!s.date.startsWith(t)) return false; } return true; }); }
     function renderReport(){
         const filtered=getFilteredSales(); const years=[...new Set(appData.sales.map(s=>s.date.slice(0,4)))].sort().reverse();
@@ -541,7 +576,7 @@
     window.updateFilter=(t,v)=>{ if(t==='customer') filterCustomer=v; else if(t==='flavor') filterFlavor=v; else if(t==='year') filterYear=v; else if(t==='month') filterMonth=v; renderReport(); };
     window.resetFilter=()=>{ filterCustomer=filterFlavor=filterYear=filterMonth=''; renderReport(); };
 
-    // 销售统计
+    // 销售统计 (保持不变)
     function getWeekStartAndEnd(d){ const dt=new Date(d+'T00:00:00'); const day=dt.getDay(); const diff=day===0?6:day-1; const mon=new Date(dt); mon.setDate(dt.getDate()-diff); const sun=new Date(mon); sun.setDate(mon.getDate()+6); const fmt=d=>`${d.getMonth()+1}.${d.getDate()}`; return {mon,sun,startStr:fmt(mon),endStr:fmt(sun)}; }
     function getPeriodKeyAndRange(d,g){ const dt=new Date(d+'T00:00:00'); const y=dt.getFullYear(),m=dt.getMonth()+1; if(g==='year') return {key:`${y}年`}; if(g==='quarter') return {key:`${y}年Q${Math.ceil(m/3)}`}; if(g==='month') return {key:`${y}年${m.toString().padStart(2,'0')}月`}; if(g==='week'){ const {mon,startStr,endStr}=getWeekStartAndEnd(d); const wy=mon.getFullYear(); const ws=new Date(Date.UTC(wy,0,1)); const days=Math.floor((mon-ws)/86400000); const wk=Math.ceil((days+1)/7); return {key:`${wy}年第${wk}周`,rangeStr:` (${startStr}-${endStr})`}; } return {key:d}; }
     function renderStat(){
@@ -559,31 +594,161 @@
     window.setChartType=t=>{ chartType=t; renderStat(); }; window.setChartMetric=m=>{ chartMetric=m; renderStat(); };
     window.exportStatCSV=function(){ showToast('CSV导出'); }; window.exportStatImage=function(){ showToast('图片导出'); };
 
-    // 采购管理（修正：先更新单价，再调整库存）
+    // ---------- 采购管理 (修改部分，增加日志) ----------
     function renderPurchase(){
         const ps=appData.purchases||[]; const total=ps.reduce((s,p)=>s+Number(p.total||0),0);
         let rec=''; if(ps.length===0) rec='<p style="text-align:center;padding:40px;color:#888;">暂无采购记录</p>';
         else rec='<div class="purchase-list-container">'+ps.slice().reverse().map(p=>{ const unit=p.ingredient==='包装'?'个':'kg'; const pricePerUnit=(Number(p.total)||0)/(Number(p.quantity)||1); return `<div class="card purchase-record-item"><div style="display:flex;justify-content:space-between;"><span><b>${p.ingredient}</b> ${p.quantity||''}${unit}</span></div><div style="display:flex;justify-content:space-between;color:#666;"><span>总价:¥${(p.total||0).toFixed(2)}</span><span class="price-per-gram">≈¥${pricePerUnit.toFixed(4)}/${unit}</span></div><div style="color:#888;font-size:12px;">${p.date}</div></div>`; }).join('')+'</div>';
-        views.purchase.innerHTML=`<div style="padding:16px;height:100%;display:flex;flex-direction:column;"><div class="purchase-nav"><button class="back-btn" onclick="showView('home')">← 返回</button><h3>采购管理</h3></div><div style="display:flex;gap:10px;margin-bottom:16px;"><button onclick="openPurchaseModal()" style="flex:2;">➕ 新增采购</button><button onclick="openIngredientModal()" style="flex:1;" class="secondary">📦 管理原料</button></div><div class="stat-summary"><div style="display:flex;justify-content:space-around;"><div><span style="color:#888;">采购总支出</span><br><span style="font-size:18px;font-weight:bold;">¥${total.toFixed(2)}</span></div></div></div><div style="flex:1;overflow-y:auto;">${rec}</div></div>`;
+        views.purchase.innerHTML=`<div style="padding:16px;height:100%;display:flex;flex-direction:column;"><div class="purchase-nav"><button class="back-btn" onclick="showView('home')">← 返回</button><h3>采购管理</h3></div><div style="display:flex;gap:10px;margin-bottom:16px;"><button onclick="openPurchaseModal()" style="flex:2;">➕ 新增采购</button><button onclick="openIngredientModal()" style="flex:2;" class="secondary">📦 管理原料</button><button onclick="openEditPurchaseListModal()" style="flex:1;" class="secondary">修改</button></div><div class="stat-summary"><div style="display:flex;justify-content:space-around;"><div><span style="color:#888;">采购总支出</span><br><span style="font-size:18px;font-weight:bold;">¥${total.toFixed(2)}</span></div></div></div><div style="flex:1;overflow-y:auto;">${rec}</div></div>`;
     }
+    // 打开修改列表
+    window.openEditPurchaseListModal = function() {
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const recentPurchases = appData.purchases.filter(p => p.date === today || p.date === yesterday);
+        const container = document.getElementById('editPurchaseListContent');
+        if (recentPurchases.length === 0) {
+            container.innerHTML = '<p style="text-align:center;padding:20px;">近两日无采购记录</p>';
+        } else {
+            let html = '';
+            recentPurchases.slice().reverse().forEach(p => {
+                const unit = p.ingredient === '包装' ? '个' : 'kg';
+                html += `<div class="edit-list-item">
+                    <div class="edit-list-info">
+                        <div><b>${p.ingredient}</b> ${p.quantity}${unit}  ￥${Number(p.total).toFixed(2)}</div>
+                        <div style="font-size:12px;color:#888;">${p.date}</div>
+                    </div>
+                    <button class="edit-list-btn" onclick="editPurchaseRecord('${p.date}','${p.ingredient}',${p.quantity},${p.total})">编辑</button>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+        document.getElementById('editPurchaseListModal').style.display = 'flex';
+    };
+    window.closeEditPurchaseListModal = () => document.getElementById('editPurchaseListModal').style.display = 'none';
+    
+    // 显示修改记录
+    window.showEditLogs = function() {
+        const logs = appData.purchaseEditLogs.slice().reverse();
+        const content = document.getElementById('editLogsContent');
+        if (logs.length === 0) {
+            content.innerHTML = '<p style="text-align:center;padding:20px;color:#888;">暂无修改记录</p>';
+        } else {
+            let html = '';
+            logs.forEach(log => {
+                html += `<div class="log-entry">
+                    <div><b>${log.timestamp}</b></div>
+                    <div>原料：${log.ingredient}</div>
+                    <div>原记录：${log.oldQty} ${log.unit} / ￥${log.oldTotal.toFixed(2)} (${log.oldDate})</div>
+                    <div>新记录：${log.newQty} ${log.unit} / ￥${log.newTotal.toFixed(2)}</div>
+                </div>`;
+            });
+            content.innerHTML = html;
+        }
+        document.getElementById('editLogsModal').style.display = 'flex';
+    };
+    window.closeEditLogsModal = () => document.getElementById('editLogsModal').style.display = 'none';
+    
+    window.editPurchaseRecord = function(date, ingredient, quantity, total) {
+        closeEditPurchaseListModal();
+        const original = appData.purchases.find(p => p.date === date && p.ingredient === ingredient && Math.abs(p.quantity - quantity) < 0.0001 && Math.abs(p.total - total) < 0.001);
+        if (!original) { showToast('记录不存在'); return; }
+        document.getElementById('purchaseModalTitle').textContent = '修改采购';
+        updateIngredientSelect();
+        document.getElementById('purchaseIngredientSelect').value = ingredient;
+        document.getElementById('purchaseQuantity').value = quantity;
+        document.getElementById('purchasePrice').value = total;
+        document.getElementById('editingPurchaseId').value = JSON.stringify({ date, ingredient, quantity, total });
+        const saveBtn = document.getElementById('purchaseSaveBtn');
+        saveBtn.textContent = '更新';
+        saveBtn.onclick = updatePurchase;
+        document.getElementById('purchaseModalOverlay').style.display = 'flex';
+        const ingSelect = document.getElementById('purchaseIngredientSelect');
+        const label = document.getElementById('purchaseUnitLabel');
+        const qtyInput = document.getElementById('purchaseQuantity');
+        if (ingSelect.value === '包装') { label.textContent = '数量(个)'; qtyInput.step = '1'; qtyInput.min = '1'; }
+        else { label.textContent = '数量(kg)'; qtyInput.step = '0.001'; qtyInput.min = '0.001'; }
+        ingSelect.onchange = function() {
+            if (this.value === '包装') { label.textContent = '数量(个)'; qtyInput.step = '1'; qtyInput.min = '1'; }
+            else { label.textContent = '数量(kg)'; qtyInput.step = '0.001'; qtyInput.min = '0.001'; }
+        };
+    };
+    
+    window.updatePurchase = function() {
+        const originalStr = document.getElementById('editingPurchaseId').value;
+        if (!originalStr) { showToast('编辑状态异常'); return; }
+        let original;
+        try { original = JSON.parse(originalStr); } catch(e) { showToast('数据错误'); return; }
+        const index = appData.purchases.findIndex(p => p.date === original.date && p.ingredient === original.ingredient && Math.abs(p.quantity - original.quantity) < 0.0001 && Math.abs(p.total - original.total) < 0.001);
+        if (index === -1) { showToast('原始记录已被修改或删除'); closePurchaseModal(); return; }
+        const oldRecord = appData.purchases[index];
+        
+        const newIng = document.getElementById('purchaseIngredientSelect').value;
+        const newQty = parseFloat(document.getElementById('purchaseQuantity').value);
+        const newTotal = parseFloat(document.getElementById('purchasePrice').value);
+        if (!newIng) { showToast('请选择原料'); return; }
+        if (isNaN(newQty) || newQty <= 0) { showToast('无效数量'); return; }
+        if (isNaN(newTotal) || newTotal < 0) { showToast('无效总价'); return; }
+        
+        // 记录修改日志
+        const unit = oldRecord.ingredient === '包装' ? '个' : 'kg';
+        const newUnit = newIng === '包装' ? '个' : 'kg';
+        appData.purchaseEditLogs.push({
+            timestamp: new Date().toLocaleString(),
+            ingredient: `${oldRecord.ingredient} → ${newIng}`,
+            oldDate: oldRecord.date,
+            oldQty: oldRecord.quantity,
+            oldTotal: oldRecord.total,
+            newQty: newQty,
+            newTotal: newTotal,
+            unit: unit + ' → ' + newUnit
+        });
+        
+        // 回滚旧采购
+        const oldUnits = (oldRecord.ingredient === '包装') ? oldRecord.quantity : oldRecord.quantity * 1000;
+        adjustIngredientStock(oldRecord.ingredient, -oldUnits, '修改采购回滚', `撤销原采购 ${oldRecord.quantity}${oldRecord.ingredient==='包装'?'个':'kg'}`);
+        appData.purchases.splice(index, 1);
+        
+        // 新增
+        const newRecord = { date: oldRecord.date, ingredient: newIng, quantity: newQty, total: newTotal };
+        appData.purchases.push(newRecord);
+        const newUnits = (newIng === '包装') ? newQty : newQty * 1000;
+        adjustIngredientStock(newIng, newUnits, '修改采购', `修改后采购 ${newQty}${newIng==='包装'?'个':'kg'}`);
+        
+        const affectedIngredients = new Set([oldRecord.ingredient, newIng]);
+        affectedIngredients.forEach(ing => recalcIngredientUnitCost(ing));
+        
+        saveData();
+        closePurchaseModal();
+        renderPurchase();
+        showToast('采购记录已更新，库存与成本已同步');
+    };
+    
     window.openIngredientModal=function(){ renderIngredientList(); document.getElementById('ingredientModalOverlay').style.display='flex'; };
     window.closeIngredientModal=()=>document.getElementById('ingredientModalOverlay').style.display='none';
     function renderIngredientList(){ const cont=document.getElementById('ingredientListContainer'); cont.innerHTML = appData.ingredients.map((ing,i)=>`<div class="ingredient-item"><span>${ing}</span><button class="delete-btn-small" onclick="deleteIngredient(${i},'${ing}')">删除</button></div>`).join(''); }
     window.addIngredient=function(){ const inp=document.getElementById('newIngredientName'); const name=inp.value.trim(); if(!name){ showToast('请输入名称'); return; } if(appData.ingredients.includes(name)){ showToast('已存在'); return; } appData.ingredients.push(name); appData.ingredientStock[name]=0; appData.ingredientUnitCost[name]=0; saveData(); inp.value=''; renderIngredientList(); showToast(`已添加原料：${name}`); };
     window.deleteIngredient=function(i,name){ if(appData.purchases.some(p=>p.ingredient===name)||appData.productions.some(p=>p.flavor)){ showToast('原料已被使用，无法删除'); return; } appData.ingredients.splice(i,1); delete appData.ingredientStock[name]; delete appData.ingredientUnitCost[name]; saveData(); renderIngredientList(); showToast('已删除'); };
-    function updateIngredientSelect(){ const sel=document.getElementById('purchaseIngredientSelect'); sel.innerHTML = appData.ingredients.map(ing=>`<option value="${ing}">${ing}</option>`).join(''); }
+    function updateIngredientSelect(){ const sel=document.getElementById('purchaseIngredientSelect'); if(sel) sel.innerHTML = appData.ingredients.map(ing=>`<option value="${ing}">${ing}</option>`).join(''); }
     window.openPurchaseModal=function(){ 
+        document.getElementById('purchaseModalTitle').textContent = '新增采购';
+        document.getElementById('editingPurchaseId').value = '';
         updateIngredientSelect(); 
         document.getElementById('purchaseQuantity').value=''; 
         document.getElementById('purchasePrice').value=''; 
+        const saveBtn = document.getElementById('purchaseSaveBtn');
+        saveBtn.textContent = '保存';
+        saveBtn.onclick = savePurchase;
         document.getElementById('purchaseModalOverlay').style.display='flex';
-        document.getElementById('purchaseIngredientSelect').onchange = function() {
-            const ing = this.value;
-            const label = document.getElementById('purchaseUnitLabel');
-            const qtyInput = document.getElementById('purchaseQuantity');
-            if (ing === '包装') { label.textContent = '数量(个)'; qtyInput.step = '1'; qtyInput.min = '1'; }
+        const ingSelect = document.getElementById('purchaseIngredientSelect');
+        const label = document.getElementById('purchaseUnitLabel');
+        const qtyInput = document.getElementById('purchaseQuantity');
+        ingSelect.onchange = function() {
+            if (this.value === '包装') { label.textContent = '数量(个)'; qtyInput.step = '1'; qtyInput.min = '1'; }
             else { label.textContent = '数量(kg)'; qtyInput.step = '0.001'; qtyInput.min = '0.001'; }
         };
+        if (ingSelect.value === '包装') { label.textContent = '数量(个)'; qtyInput.step = '1'; qtyInput.min = '1'; }
+        else { label.textContent = '数量(kg)'; qtyInput.step = '0.001'; qtyInput.min = '0.001'; }
     };
     window.closePurchaseModal=()=>document.getElementById('purchaseModalOverlay').style.display='none';
     window.savePurchase=function(){
@@ -594,15 +759,13 @@
         const today=new Date().toISOString().split('T')[0];
         appData.purchases.push({date:today, ingredient:ing, quantity:qty, total:total});
         const addedUnits = (ing === '包装') ? qty : qty * 1000;
-        // 先更新移动平均单价
         updateMovingAverageCost(ing, addedUnits, total);
-        // 再调整库存
         adjustIngredientStock(ing, addedUnits, '采购入库', `采购 ${qty}${ing==='包装'?'个':'kg'}`);
         saveData();
         closePurchaseModal(); renderPurchase(); showToast('采购已添加，库存已更新');
     };
 
-    // 库存管理
+    // 库存管理 (保持不变)
     function renderInventory(){
         const ings=appData.ingredients||[], flavors=appData.flavors||[]; let items='';
         if(inventoryMode==='ingredient'){
@@ -619,10 +782,8 @@
     window.confirmStockChange=function(){
         if(!currentStockItem) return; const d=parseFloat(document.getElementById('stockChangeInput').value); if(isNaN(d)||d===0){ showToast('变动量不能为0'); return; }
         const r=document.getElementById('stockRemarkInput').value.trim()||'手动调整';
-        if(currentStockItem.type==='ingredient') {
-            adjustIngredientStock(currentStockItem.name, d, '手动调整', r);
-            // 手动盘点不修改单价
-        } else adjustPizzaStock(currentStockItem.name, d, '手动调整', r);
+        if(currentStockItem.type==='ingredient') adjustIngredientStock(currentStockItem.name, d, '手动调整', r);
+        else adjustPizzaStock(currentStockItem.name, d, '手动调整', r);
         closeStockModal(); renderInventory(); showToast('库存已更新');
     };
     window.showStockLogs=function(){
@@ -630,7 +791,7 @@
         const m=document.createElement('div'); m.className='modal-overlay'; m.style.display='flex'; m.innerHTML=`<div class="modal-card"><div class="modal-title">库存流水</div><div style="max-height:400px;overflow-y:auto;">${h}</div><div class="modal-actions"><button onclick="this.closest('.modal-overlay').remove()">关闭</button></div></div>`; document.body.appendChild(m);
     };
 
-    // 制作消耗
+    // 制作消耗 (保持不变)
     function renderProduction() {
         let html = `<div style="padding:16px;height:100%;display:flex;flex-direction:column;overflow-y:auto;"><div class="production-nav"><button class="back-btn" onclick="showView('home')">← 返回</button><h3>制作消耗</h3></div><div class="production-tabs"><div class="production-tab ${productionMode==='make'?'active':''}" onclick="switchProductionMode('make')">🍕 制作</div><div class="production-tab ${productionMode==='consume'?'active':''}" onclick="switchProductionMode('consume')">📉 消耗</div></div>`;
         if (productionMode === 'make') {
@@ -706,7 +867,7 @@
         showToast('制作完成，库存已更新');
     };
 
-    // 设置
+    // 设置 (保持不变)
     function renderSettings(){ views.settings.innerHTML=`<div style="padding:16px;"><div class="stat-nav"><button class="back-btn" onclick="showView('home')">← 返回</button><h3>设置</h3></div><div class="card"><button onclick="exportBackup()">📤 导出备份</button></div><div class="card"><div class="file-input-wrapper"><button class="secondary">📂 恢复备份</button><input type="file" id="restoreFileInput" accept=".json"></div></div></div>`; document.getElementById('restoreFileInput').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); appData=d; saveData(); showToast('恢复成功'); showView('home'); }catch{ showToast('无效文件'); } }; r.readAsText(f); }); }
     window.exportBackup=function(){ const b=new Blob([JSON.stringify(appData)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`pizza_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('备份已导出'); };
 
@@ -720,6 +881,13 @@
     window.switchInventoryMode=switchInventoryMode; window.openStockAdjust=openStockAdjust; window.closeStockModal=closeStockModal; window.confirmStockChange=confirmStockChange; window.showStockLogs=showStockLogs;
     window.switchProductionMode=switchProductionMode; window.changeProductionQty=changeProductionQty; window.updateProductionQty=updateProductionQty; window.confirmProduction=confirmProduction; window.closeConfirmProductionModal=closeConfirmProductionModal; window.executeProduction=executeProduction; window.closeInsufficientModal=closeInsufficientModal;
     window.exportBackup=exportBackup;
+    window.openEditPurchaseListModal = openEditPurchaseListModal;
+    window.closeEditPurchaseListModal = closeEditPurchaseListModal;
+    window.editPurchaseRecord = editPurchaseRecord;
+    window.updatePurchase = updatePurchase;
+    window.showEditLogs = showEditLogs;
+    window.closeEditLogsModal = closeEditLogsModal;
+    
     showView('home');
 })();
 </script>

@@ -127,7 +127,7 @@
         .total-cost-row { margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; }
         .ingredient-dynamic-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
         .ingredient-dynamic-row select { flex: 2; }
-        .ingredient-dynamic-row input { flex:2; }
+        .ingredient-dynamic-row input { flex: 2; }
         .ingredient-dynamic-row button { width: auto; padding: 2px 6px; background: #C62828; font-size: 12px; }
         .warning-card { background: #FFF3E0; border-left: 4px solid #FF9800; }
         .warning-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #ddd; }
@@ -179,14 +179,14 @@
 (function(){
     "use strict";
     // ---------- 数据模型 ----------
-    const STORAGE_KEY = 'pizza_app_v33_moving_avg';
+    const STORAGE_KEY = 'pizza_app_v34_fixed';
     const PRESET_INGREDIENTS = ['面粉','番茄酱','菜丁','菠萝丁','榴莲','鸡丁','香肠','芝士','包装'];
     const defaultData = {
         flavors: [],
         customers: [ { name: '古早味', price: 10 }, { name: '个人版', price: 15 } ],
         sales: [], purchases: [], ingredients: PRESET_INGREDIENTS.slice(), productions: [],
         ingredientStock: {}, pizzaStock: {}, stockLogs: [],
-        ingredientUnitCost: {}   // 新增：移动平均单价（元/克或元/个）
+        ingredientUnitCost: {}   // 移动平均单价（元/克或元/个）
     };
     let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
     PRESET_INGREDIENTS.forEach(ing => { if (!appData.ingredients.includes(ing)) appData.ingredients.push(ing); });
@@ -199,7 +199,7 @@
         if (appData.ingredientStock[ing] === undefined) appData.ingredientStock[ing] = 0;
         if (appData.ingredientUnitCost[ing] === undefined) appData.ingredientUnitCost[ing] = 0;
     });
-    // 初始化移动平均单价：如果已有采购记录但单价为空，则计算一次
+    // 初始化移动平均单价：根据采购记录计算
     appData.ingredients.forEach(ing => {
         const purchases = appData.purchases.filter(p => p.ingredient === ing);
         if (purchases.length > 0) {
@@ -234,12 +234,12 @@
     function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
     function showToast(msg, d=1500) { const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', d); }
     
-    // 核心改动：移动加权平均单价
+    // 获取移动平均单价
     function getIngredientPricePerGram(ingredientName) {
         return Number(appData.ingredientUnitCost[ingredientName]) || 0;
     }
     
-    // 更新移动平均单价（采购入库时调用）
+    // 更新移动平均单价（采购入库时调用，先更新单价再调库存）
     function updateMovingAverageCost(ingredientName, addedQuantity, addedCost) {
         const currentStock = appData.ingredientStock[ingredientName] || 0;
         const currentUnitCost = appData.ingredientUnitCost[ingredientName] || 0;
@@ -251,6 +251,7 @@
         } else {
             appData.ingredientUnitCost[ingredientName] = 0;
         }
+        // 注意：不在这里调用 adjustIngredientStock，由采购流程统一处理
     }
     
     function calcDoughCost(doughWeight) {
@@ -270,7 +271,6 @@
         if(!appData.ingredientStock[ing]) appData.ingredientStock[ing]=0;
         appData.ingredientStock[ing] = Math.max(0, appData.ingredientStock[ing] + delta);
         addStockLog('ingredient', ing, delta, appData.ingredientStock[ing], reason, remark);
-        // 注意：出库时不改变移动平均单价
     }
     function adjustPizzaStock(flavor, delta, reason, remark='') { if(!appData.pizzaStock[flavor]) appData.pizzaStock[flavor]=0; appData.pizzaStock[flavor]=Math.max(0, appData.pizzaStock[flavor]+delta); addStockLog('pizza', flavor, delta, appData.pizzaStock[flavor], reason, remark); }
     function getIngredientsForFlavor(flavorName, quantity) {
@@ -541,7 +541,7 @@
     window.updateFilter=(t,v)=>{ if(t==='customer') filterCustomer=v; else if(t==='flavor') filterFlavor=v; else if(t==='year') filterYear=v; else if(t==='month') filterMonth=v; renderReport(); };
     window.resetFilter=()=>{ filterCustomer=filterFlavor=filterYear=filterMonth=''; renderReport(); };
 
-    // 销售统计 (保持原有图表功能，略作调整)
+    // 销售统计
     function getWeekStartAndEnd(d){ const dt=new Date(d+'T00:00:00'); const day=dt.getDay(); const diff=day===0?6:day-1; const mon=new Date(dt); mon.setDate(dt.getDate()-diff); const sun=new Date(mon); sun.setDate(mon.getDate()+6); const fmt=d=>`${d.getMonth()+1}.${d.getDate()}`; return {mon,sun,startStr:fmt(mon),endStr:fmt(sun)}; }
     function getPeriodKeyAndRange(d,g){ const dt=new Date(d+'T00:00:00'); const y=dt.getFullYear(),m=dt.getMonth()+1; if(g==='year') return {key:`${y}年`}; if(g==='quarter') return {key:`${y}年Q${Math.ceil(m/3)}`}; if(g==='month') return {key:`${y}年${m.toString().padStart(2,'0')}月`}; if(g==='week'){ const {mon,startStr,endStr}=getWeekStartAndEnd(d); const wy=mon.getFullYear(); const ws=new Date(Date.UTC(wy,0,1)); const days=Math.floor((mon-ws)/86400000); const wk=Math.ceil((days+1)/7); return {key:`${wy}年第${wk}周`,rangeStr:` (${startStr}-${endStr})`}; } return {key:d}; }
     function renderStat(){
@@ -559,7 +559,7 @@
     window.setChartType=t=>{ chartType=t; renderStat(); }; window.setChartMetric=m=>{ chartMetric=m; renderStat(); };
     window.exportStatCSV=function(){ showToast('CSV导出'); }; window.exportStatImage=function(){ showToast('图片导出'); };
 
-    // 采购管理（关键：入库时更新移动平均单价）
+    // 采购管理（修正：先更新单价，再调整库存）
     function renderPurchase(){
         const ps=appData.purchases||[]; const total=ps.reduce((s,p)=>s+Number(p.total||0),0);
         let rec=''; if(ps.length===0) rec='<p style="text-align:center;padding:40px;color:#888;">暂无采购记录</p>';
@@ -594,9 +594,10 @@
         const today=new Date().toISOString().split('T')[0];
         appData.purchases.push({date:today, ingredient:ing, quantity:qty, total:total});
         const addedUnits = (ing === '包装') ? qty : qty * 1000;
-        // 先增加库存，再更新移动平均单价
-        adjustIngredientStock(ing, addedUnits, '采购入库', `采购 ${qty}${ing==='包装'?'个':'kg'}`);
+        // 先更新移动平均单价
         updateMovingAverageCost(ing, addedUnits, total);
+        // 再调整库存
+        adjustIngredientStock(ing, addedUnits, '采购入库', `采购 ${qty}${ing==='包装'?'个':'kg'}`);
         saveData();
         closePurchaseModal(); renderPurchase(); showToast('采购已添加，库存已更新');
     };
@@ -620,8 +621,7 @@
         const r=document.getElementById('stockRemarkInput').value.trim()||'手动调整';
         if(currentStockItem.type==='ingredient') {
             adjustIngredientStock(currentStockItem.name, d, '手动调整', r);
-            // 手动调整库存时，若为入库（d>0），需要更新移动平均单价吗？按惯例，手动盘点入库通常视为成本为0的入库，不改变单价。
-            // 此处保持简单，不修改单价。
+            // 手动盘点不修改单价
         } else adjustPizzaStock(currentStockItem.name, d, '手动调整', r);
         closeStockModal(); renderInventory(); showToast('库存已更新');
     };
